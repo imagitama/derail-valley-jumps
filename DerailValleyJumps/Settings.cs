@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
+using DerailValleyBindingHelper;
 using UnityEngine;
 using UnityModManagerNet;
 
@@ -28,7 +28,7 @@ public class Settings : UnityModManager.ModSettings, IDrawable
     [Draw(Label = "Draw extra debugging stuff")]
     public bool ExtraDebugging = false;
     [Draw(Label = "Jump Force x100000 (default 20)")]
-    public float JumpForce = 200f;
+    public float JumpForce = 150f;
     [Draw(Label = "Flip force x100000 (default 20)")]
     public float FlipForce = 40f;
     [Draw(Label = "Turn force x100000 (default 40)")]
@@ -45,7 +45,7 @@ public class Settings : UnityModManager.ModSettings, IDrawable
     {
         DisableDefault = true
     };
-    public BindingInfo FlipBackwardsBinding = new BindingInfo("Flip Backwards", Actions.FlipForwards, KeyCode.Keypad2)
+    public BindingInfo FlipBackwardsBinding = new BindingInfo("Flip Backwards", Actions.FlipBackwards, KeyCode.Keypad2)
     {
         DisableDefault = true
     };
@@ -65,7 +65,6 @@ public class Settings : UnityModManager.ModSettings, IDrawable
     {
         DisableDefault = true
     };
-    public BindingInfo ReRailBinding = new BindingInfo("Force Re-Rail", Actions.ReRail, KeyCode.F12);
 
     public override void Save(UnityModManager.ModEntry modEntry)
     {
@@ -79,6 +78,7 @@ public class Settings : UnityModManager.ModSettings, IDrawable
 
     public void ApplyBindingDisabling()
     {
+
         List<BindingInfo> bindings = [
             JumpBinding,
             FlipFowardsBinding,
@@ -89,24 +89,6 @@ public class Settings : UnityModManager.ModSettings, IDrawable
             RollRightBinding,
         ];
 
-        foreach (var binding in bindings)
-        {
-            var conflicts = BindingsHelper.GetConflictingBindings(binding);
-
-            if (binding.DisableDefault)
-            {
-                Logger.Log($"{binding.ActionId} Disabling {conflicts.Count} defaults: {string.Join(",", conflicts.Select(x => $"{x.actionDescriptiveName} ({x.controllerMap.controllerType})"))}");
-
-                foreach (var conflict in conflicts)
-                    conflict.enabled = false;
-            }
-            else
-            {
-                Logger.Log($"{binding.ActionId} Enabling {conflicts.Count} defaults: {string.Join(",", conflicts.Select(x => $"{x.actionDescriptiveName} ({x.controllerMap.controllerType})"))}");
-
-                foreach (var conflict in conflicts)
-                    conflict.enabled = true;
-            }
-        }
+        BindingsHelper.ApplyBindingDisables(bindings);
     }
 }

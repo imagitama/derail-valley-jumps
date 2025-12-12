@@ -1,9 +1,11 @@
 {
 	"Id": "DerailValleyJumps",
-	"Version": "0.0.2",
+	"Version": "0.0.3",
 	"DisplayName": "Jumps!",
 	"Author": "Jared Williams",
 	"EntryMethod": "DerailValleyJumps.Main.Load",
 	"ManagerVersion": "0.32.4",
-	"Repository": "https://raw.githubusercontent.com/imagitama/derail-valley-jumps/main/repository.json"
+	"Repository": "https://raw.githubusercontent.com/imagitama/derail-valley-jumps/main/repository.json",
+	"Requires": ["DerailValleyBindingHelper"],
+	"LoadAfter": ["DerailValleyBindingHelper"]
 }

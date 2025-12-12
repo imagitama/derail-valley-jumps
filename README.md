@@ -6,7 +6,14 @@ A mod for the game [Derail Valley](https://store.steampowered.com/app/588030/Der
 
 Open the mod settings (Ctrl+F10) to view and change bindings.
 
-By default "space" for jump, numpad numbers for roll/spin/turn and F12 to quick rerail (or flip direction).
+By default Numpad 0 for jump, numpad numbers for roll/spin/turn and F12 to quick rerail (or flip direction).
+
+|             |                 |              |
+| ----------- | --------------- | ------------ |
+| 7 roll left | 8 flip forward  | 9 roll right |
+| 4 turn left | 5               | 6 turn right |
+| 1           | 2 flip backward | 3            |
+| 0 jump      |                 | .            |
 
 ## Install
 

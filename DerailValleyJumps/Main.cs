@@ -4,6 +4,7 @@ using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 using UnityModManagerNet;
+using DerailValleyBindingHelper;
 
 namespace DerailValleyJumps;
 
@@ -34,8 +35,7 @@ public static class Main
                     settings.TurnLeftBinding,
                     settings.TurnRightBinding,
                     settings.RollLeftBinding,
-                    settings.RollRightBinding,
-                    settings.ReRailBinding
+                    settings.RollRightBinding
                 ]);
 
                 settings.ApplyBindingDisabling();
@@ -107,10 +107,9 @@ public static class Main
             settings.TurnRightBinding,
             settings.RollLeftBinding,
             settings.RollRightBinding,
-            settings.ReRailBinding
         ];
 
-        BindingsHelperUI.DrawBindings(bindings, OnUpdated: settings.ApplyBindingDisabling);
+        BindingsHelperUI.DrawBindings(bindings, OnUpdated: () => BindingsHelper.ApplyBindingDisables(bindings));
     }
 
     static void OnSaveGUI(UnityModManager.ModEntry modEntry)

@@ -1,3 +1,8 @@
+# 0.0.3
+
+- gradual flip/spin/roll
+- fixed player teleportation glitch
+
 # 0.0.2
 
 - only allow upright landings

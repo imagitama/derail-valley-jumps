@@ -51,7 +51,7 @@
 
 	<!-- Mods -->
 	<ItemGroup>
-		<Reference Include="PassengerJobs" />
+		<Reference Include="DerailValleyBindingHelper" />
 	</ItemGroup>
 
 	<!-- Null Checking -->
