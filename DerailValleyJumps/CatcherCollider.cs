@@ -4,7 +4,7 @@ using UnityModManagerNet;
 
 namespace DerailValleyJumps;
 
-public class CatcherCollider : MonoBehaviour
+public class Catcher : MonoBehaviour
 {
     public static UnityModManager.ModEntry.ModLogger Logger => Main.ModEntry.Logger;
     public RailTrack Track;

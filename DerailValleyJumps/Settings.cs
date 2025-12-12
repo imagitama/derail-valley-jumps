@@ -8,27 +8,33 @@ namespace DerailValleyJumps;
 
 public static class Actions
 {
-    public static int Jump = 500;
-    public static int FlipForwards = 501;
-    public static int FlipBackwards = 502;
-    public static int TurnLeft = 503;
-    public static int TurnRight = 504;
-    public static int RollLeft = 505;
-    public static int RollRight = 506;
-    public static int ReRail = 520;
+    public const int Jump = 500;
+    public const int FlipForwards = 501;
+    public const int FlipBackwards = 502;
+    public const int TurnLeft = 503;
+    public const int TurnRight = 504;
+    public const int RollLeft = 505;
+    public const int RollRight = 506;
+    public const int ReRail = 520;
 }
 
 public class Settings : UnityModManager.ModSettings, IDrawable
 {
     private static UnityModManager.ModEntry.ModLogger Logger => Main.ModEntry.Logger;
+    [Draw(Label = "A tiny delay before actually rerailing")]
+    public float RerailDelay = 0.1f;
     [Draw(Label = "Extra gravity for heavier landings")]
     public float ExtraGravity = 2f;
     [Draw(Label = "Draw extra debugging stuff")]
     public bool ExtraDebugging = false;
-    [Draw(Label = "Jump Force (default 2,000,000)")]
+    [Draw(Label = "Jump Force (default 2m)")]
     public float JumpForce = 2000000f;
-    [Draw(Label = "Spin force (default 2,000,000)")]
-    public float SpinForce = 2000000f;
+    [Draw(Label = "Flip force (default 4m)")]
+    public float FlipForce = 4000000f;
+    [Draw(Label = "Turn force (default 2m)")]
+    public float TurnForce = 2000000f;
+    [Draw(Label = "Roll force (default 2m)")]
+    public float RollForce = 2000000f;
     public BindingInfo JumpBinding = new BindingInfo("Jump", Actions.Jump, KeyCode.Space)
     {
         DisableDefault = true

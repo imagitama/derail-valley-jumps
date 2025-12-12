@@ -166,14 +166,11 @@ public static class TrackWalking
         RailTrack current,
         Transform trainTransform)
     {
-        // Determine which way we are facing on THIS track
         bool isForwardOnTrack = GetIsForwardsOnTrack(current, trainTransform);
 
-        // We will walk track by track until we find a junction
         RailTrack iter = current;
         bool direction = isForwardOnTrack;
 
-        // To prevent infinite looping, a simple visited set
         var visited = new HashSet<RailTrack>();
 
         while (iter != null && !visited.Contains(iter))

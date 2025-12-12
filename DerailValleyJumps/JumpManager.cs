@@ -1,37 +1,37 @@
-using System;
-using System.Reflection;
-using HarmonyLib;
 using UnityModManagerNet;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Collections;
+using System;
 
 namespace DerailValleyJumps;
 
 public class JumpManager
 {
     private UnityModManager.ModEntry.ModLogger Logger => Main.ModEntry.Logger;
-    private GameObject? _updateDriver;
-    private List<CatcherCollider> _catchers = [];
-    private float? _recentlyJumpedTimer;
-    private bool hasStarted = false;
+    private GameObject? _updateDriverGO;
+    private UpdateDriver? _updateDriver;
+    private List<Catcher> _catchers = [];
+    private bool _hasStarted = false;
 
     public void Start()
     {
-        if (hasStarted)
+        if (_hasStarted)
             return;
 
-        Logger.Log($"Starting... jump={Main.settings.JumpForce} spin={Main.settings.SpinForce} gravity={Main.settings.ExtraGravity}");
+        Logger.Log($"Starting... jump={Main.settings.JumpForce} flip={Main.settings.FlipForce} turn={Main.settings.TurnForce} roll={Main.settings.RollForce} gravity={Main.settings.ExtraGravity}");
 
-        _updateDriver = new GameObject("DerailValleyJumps_UpdateDriver");
-        UnityEngine.Object.DontDestroyOnLoad(_updateDriver);
-        var comp = _updateDriver.AddComponent<UpdateDriver>();
-        comp.OnFrame = OnFrame;
-        comp.OnLateFrame = OnLateFrame;
+        _updateDriverGO = new GameObject("DerailValleyJumps_UpdateDriver");
+        UnityEngine.Object.DontDestroyOnLoad(_updateDriverGO);
+        _updateDriver = _updateDriverGO.AddComponent<UpdateDriver>();
+        _updateDriver.OnFrame = OnFrame;
+        _updateDriver.OnLateFrame = OnLateFrame;
 
         AddToRailTracks();
 
-        hasStarted = true;
+        _hasStarted = true;
     }
 
     public void Stop()
@@ -40,7 +40,7 @@ public class JumpManager
 
         RemoveFromRailTracks();
 
-        GameObject.Destroy(_updateDriver);
+        GameObject.Destroy(_updateDriverGO);
     }
 
     Dictionary<object, bool> _lastPressed = new Dictionary<object, bool>();
@@ -55,7 +55,6 @@ public class JumpManager
         _lastPressed[key] = isPressed;
         return isNew;
     }
-
 
     void OnFrame()
     {
@@ -104,7 +103,7 @@ public class JumpManager
         bool isPressed = BindingsHelper.GetIsPressed(binding);
 
         if (isPressed)
-            SpinTrainCar(PlayerManager.Car.transform.right);
+            SpinTrainCar(binding.ActionId!.Value); // PlayerManager.Car.transform.right;
     }
 
     void HandleFlipBackwards()
@@ -115,7 +114,7 @@ public class JumpManager
         bool isPressed = BindingsHelper.GetIsPressed(binding);
 
         if (isPressed)
-            SpinTrainCar(-PlayerManager.Car.transform.right);
+            SpinTrainCar(binding.ActionId!.Value); // -PlayerManager.Car.transform.right
     }
 
     void HandleTurnLeft()
@@ -126,7 +125,7 @@ public class JumpManager
         bool isPressed = BindingsHelper.GetIsPressed(binding);
 
         if (isPressed)
-            SpinTrainCar(-PlayerManager.Car.transform.up);
+            SpinTrainCar(binding.ActionId!.Value); // -PlayerManager.Car.transform.up
     }
 
     void HandleTurnRight()
@@ -137,7 +136,7 @@ public class JumpManager
         bool isPressed = BindingsHelper.GetIsPressed(binding);
 
         if (isPressed)
-            SpinTrainCar(PlayerManager.Car.transform.up);
+            SpinTrainCar(binding.ActionId!.Value); // PlayerManager.Car.transform.up
     }
 
     void HandleRollLeft()
@@ -148,7 +147,7 @@ public class JumpManager
         bool isPressed = BindingsHelper.GetIsPressed(binding);
 
         if (isPressed)
-            SpinTrainCar(-PlayerManager.Car.transform.forward);
+            SpinTrainCar(binding.ActionId!.Value); // -PlayerManager.Car.transform.forward
     }
 
     void HandleRollRight()
@@ -159,7 +158,7 @@ public class JumpManager
         bool isPressed = BindingsHelper.GetIsPressed(binding);
 
         if (isPressed)
-            SpinTrainCar(PlayerManager.Car.transform.forward);
+            SpinTrainCar(binding.ActionId!.Value); // PlayerManager.Car.transform.forward
     }
 
     void OnLateFrame()
@@ -169,21 +168,11 @@ public class JumpManager
 
         if (Main.settings.ExtraGravity > 0)
             PlayerManager.Car.rb.AddForce(Physics.gravity * Main.settings.ExtraGravity * PlayerManager.Car.rb.mass);
-
-        // if (spinTimeRemaining > 0f)
-        // {
-        //     spinTimeRemaining -= Time.fixedDeltaTime;
-
-        //     var rb = PlayerManager.Car.rb;
-        //     var torque = spinDirection * Main.settings.SpinForce;
-
-        //     rb.AddTorque(torque, ForceMode.Acceleration);
-        // }
     }
 
     void JumpTrainCar()
     {
-        Logger.Log("Jump!");
+        // Logger.Log("Jump!");
 
         var car = PlayerManager.Car;
 
@@ -193,17 +182,12 @@ public class JumpManager
         car.Derail(suppressDerailSound: true);
         car.rb.AddForce(Vector3.up * Main.settings.JumpForce, ForceMode.Impulse);
 
-        _recentlyJumpedTimer = Time.time + 0.5f;
-
-        CatcherCollider.IsReadyToCatch = false;
+        Catcher.IsReadyToCatch = false;
     }
 
-    // float spinTimeRemaining = 0f;
-    // Vector3 spinDirection;
-
-    void SpinTrainCar(Vector3 direction)
+    void SpinTrainCar(int actionId)
     {
-        Logger.Log("Spin!");
+        // Logger.Log("Spin!");
 
         var car = PlayerManager.Car;
 
@@ -213,7 +197,41 @@ public class JumpManager
         if (!car.derailed)
             return;
 
-        var torque = direction * Main.settings.SpinForce;
+        Vector3 direction;
+        float force;
+
+        switch (actionId)
+        {
+            case Actions.FlipForwards:
+                direction = PlayerManager.Car.transform.right;
+                force = Main.settings.FlipForce;
+                break;
+            case Actions.FlipBackwards:
+
+                direction = -PlayerManager.Car.transform.right;
+                force = Main.settings.FlipForce;
+                break;
+            case Actions.TurnLeft:
+                direction = -PlayerManager.Car.transform.up;
+                force = Main.settings.TurnForce;
+                break;
+            case Actions.TurnRight:
+                direction = PlayerManager.Car.transform.up;
+                force = Main.settings.TurnForce;
+                break;
+            case Actions.RollLeft:
+                direction = -PlayerManager.Car.transform.forward;
+                force = Main.settings.RollForce;
+                break;
+            case Actions.RollRight:
+                direction = PlayerManager.Car.transform.forward;
+                force = Main.settings.RollForce;
+                break;
+            default:
+                throw new Exception($"Cannot do action: {actionId}");
+        }
+
+        var torque = direction * force;
         car.rb.AddTorque(torque, ForceMode.Impulse);
     }
 
@@ -240,7 +258,7 @@ public class JumpManager
                     GameObject.Destroy(mr);
                 }
 
-                var newComp = colliderObj.gameObject.AddComponent<CatcherCollider>();
+                var newComp = colliderObj.gameObject.AddComponent<Catcher>();
                 newComp.Track = track;
                 newComp.OnHit = car => OnHit(car, track);
 
@@ -264,13 +282,23 @@ public class JumpManager
 
     void OnHit(TrainCar car, RailTrack track)
     {
-        var speedBeforeRerail = car.rb.velocity;
+        if (_updateDriver == null)
+            return;
+        _updateDriver.StartCoroutine(DelayedRerail(car, track));
+    }
 
+    IEnumerator DelayedRerail(TrainCar car, RailTrack track)
+    {
+        var speedBeforeRerail = car.rb.velocity;
         Logger.Log($"Catch has happened! Rerail '{car}' onto '{track}' speed={speedBeforeRerail}");
+
+        yield return new WaitForSeconds(Main.settings.RerailDelay);
+
+        Logger.Log("Rerailing...");
 
         TrainCarHelper.RerailTrainWithoutVelocity(car, car.transform.forward);
 
-        Logger.Log($"Rerail complete");
+        Logger.Log("Rerail complete");
     }
 
     void RemoveFromRailTracks()
@@ -281,6 +309,7 @@ public class JumpManager
 
         foreach (var railTrack in allTracks)
         {
+            // TODO: something more reliable
             var child = railTrack.transform.Find("COLLIDERS");
 
             if (child != null)

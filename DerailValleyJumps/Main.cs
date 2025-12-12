@@ -80,11 +80,23 @@ public static class Main
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Strong Spin"))
-            settings.SpinForce = 1000000;
+        {
+            settings.TurnForce = 1000000;
+            settings.FlipForce = 1000000;
+            settings.RollForce = 1000000;
+        }
         if (GUILayout.Button("Default Spin"))
-            settings.SpinForce = 500000;
+        {
+            settings.TurnForce = 500000;
+            settings.FlipForce = 500000;
+            settings.RollForce = 500000;
+        }
         if (GUILayout.Button("Weak Spin"))
-            settings.SpinForce = 100000;
+        {
+            settings.TurnForce = 100000;
+            settings.FlipForce = 100000;
+            settings.RollForce = 100000;
+        }
         GUILayout.EndHorizontal();
 
         List<BindingInfo> bindings = [
