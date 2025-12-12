@@ -1,6 +1,6 @@
 {
 	"Id": "DerailValleyJumps",
-	"Version": "0.0.1",
+	"Version": "0.0.2",
 	"DisplayName": "Jumps!",
 	"Author": "Jared Williams",
 	"EntryMethod": "DerailValleyJumps.Main.Load",

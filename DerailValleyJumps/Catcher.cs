@@ -35,34 +35,48 @@ public class Catcher : MonoBehaviour
 
         // Logger.Log($"OnTriggerEnter collider={other.gameObject.name} allowed={now > _nextAllowedInvocation}");
 
-        if (now > _nextAllowedInvocation)
-        {
-            // TODO: more reliable way
-            var isBogie = other.gameObject.name == "[bogies]";
+        if (now < _nextAllowedInvocation)
+            return;
 
-            if (isBogie)
-            {
-                TrainCar? car = null;
-                var parent = other.transform.parent;
+        // TODO: more reliable way
+        var isBogie = other.gameObject.name == "[bogies]";
 
-                if (parent != null)
-                    car = parent.GetComponent<TrainCar>();
+        if (!isBogie)
+            return;
 
-                Logger.Log($"Bogie={isBogie} Parent={parent} car={car}");
+        TrainCar? car = null;
+        var parent = other.transform.parent;
 
-                if (car != null && car.derailed)
-                {
-                    _nextAllowedInvocation = now + 0.5f;
+        if (parent != null)
+            car = parent.GetComponent<TrainCar>();
 
-                    Logger.Log($"Invoke");
+        // Logger.Log($"Bogie={isBogie} Parent={parent} car={car}");
 
-                    OnHit.Invoke(car);
+        if (car == null || !car.derailed)
+            return;
 
-                    IsReadyToCatch = false;
-                }
-            }
-        }
+        // Logger.Log($"CHECK upright={IsCarUpright(car, 45)} bogie={isBogie} parent={parent} car={car} derailed={car.derailed}");
+
+        if (!IsCarUpright(car, maxTiltDegrees: Main.settings.UprightDegrees))
+            return;
+
+        _nextAllowedInvocation = now + 0.5f;
+
+        Logger.Log($"Invoking... bogie={isBogie} parent={parent} car={car} derailed={car.derailed}");
+
+        OnHit.Invoke(car);
+
+        IsReadyToCatch = false;
     }
+
+    bool IsCarUpright(TrainCar car, float maxTiltDegrees)
+    {
+        var up = car.transform.up;
+        float angle = Vector3.Angle(up, Vector3.up);
+
+        return angle <= maxTiltDegrees;
+    }
+
 
     public static bool IsReadyToCatch = false;
 
@@ -79,19 +93,8 @@ public class Catcher : MonoBehaviour
 
         if (car != null && car.derailed)
         {
-            Logger.Log($"OnTriggerExit car={car}");
+            // Logger.Log($"OnTriggerExit car={car}");
             IsReadyToCatch = true;
         }
     }
-
-    // void OnHit(TrainCar car)
-    // {
-    //     var speedBeforeRerail = car.rb.velocity;
-
-    //     Logger.Log($"Catch has happened! Rerail '{car}' onto '{Track}' speed={speedBeforeRerail}");
-
-    //     TrainCarHelper.RerailTrainWithoutVelocity(car, car.transform.forward);
-
-    //     Logger.Log($"Rerail complete");
-    // }
 }

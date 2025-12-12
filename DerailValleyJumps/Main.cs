@@ -71,31 +71,31 @@ public static class Main
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Strong Jump"))
-            settings.JumpForce = 3000000;
+            settings.JumpForce = 30;
         if (GUILayout.Button("Default Jump"))
-            settings.JumpForce = 2000000;
+            settings.JumpForce = 20;
         if (GUILayout.Button("Weak Jump"))
-            settings.JumpForce = 1000000;
+            settings.JumpForce = 10;
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Strong Spin"))
         {
-            settings.TurnForce = 1000000;
-            settings.FlipForce = 1000000;
-            settings.RollForce = 1000000;
+            settings.TurnForce = 10;
+            settings.FlipForce = 10;
+            settings.RollForce = 10;
         }
         if (GUILayout.Button("Default Spin"))
         {
-            settings.TurnForce = 500000;
-            settings.FlipForce = 500000;
-            settings.RollForce = 500000;
+            settings.TurnForce = 5;
+            settings.FlipForce = 5;
+            settings.RollForce = 5;
         }
         if (GUILayout.Button("Weak Spin"))
         {
-            settings.TurnForce = 100000;
-            settings.FlipForce = 100000;
-            settings.RollForce = 100000;
+            settings.TurnForce = 1;
+            settings.FlipForce = 1;
+            settings.RollForce = 1;
         }
         GUILayout.EndHorizontal();
 

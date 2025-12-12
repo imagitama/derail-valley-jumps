@@ -27,14 +27,16 @@ public class Settings : UnityModManager.ModSettings, IDrawable
     public float ExtraGravity = 2f;
     [Draw(Label = "Draw extra debugging stuff")]
     public bool ExtraDebugging = false;
-    [Draw(Label = "Jump Force (default 2m)")]
-    public float JumpForce = 2000000f;
-    [Draw(Label = "Flip force (default 4m)")]
-    public float FlipForce = 4000000f;
-    [Draw(Label = "Turn force (default 2m)")]
-    public float TurnForce = 2000000f;
-    [Draw(Label = "Roll force (default 2m)")]
-    public float RollForce = 2000000f;
+    [Draw(Label = "Jump Force x100000 (default 20)")]
+    public float JumpForce = 200f;
+    [Draw(Label = "Flip force x100000 (default 20)")]
+    public float FlipForce = 40f;
+    [Draw(Label = "Turn force x100000 (default 40)")]
+    public float TurnForce = 20f;
+    [Draw(Label = "Roll force x100000 (default 40)")]
+    public float RollForce = 20f;
+    [Draw(Label = "What is the limit for what is upright (degrees, default 45)")]
+    public float UprightDegrees = 45f;
     public BindingInfo JumpBinding = new BindingInfo("Jump", Actions.Jump, KeyCode.Space)
     {
         DisableDefault = true

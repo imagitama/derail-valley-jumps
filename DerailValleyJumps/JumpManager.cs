@@ -180,7 +180,7 @@ public class JumpManager
             return;
 
         car.Derail(suppressDerailSound: true);
-        car.rb.AddForce(Vector3.up * Main.settings.JumpForce, ForceMode.Impulse);
+        car.rb.AddForce(Vector3.up * (Main.settings.JumpForce * 10000), ForceMode.Impulse);
 
         Catcher.IsReadyToCatch = false;
     }
@@ -231,7 +231,7 @@ public class JumpManager
                 throw new Exception($"Cannot do action: {actionId}");
         }
 
-        var torque = direction * force;
+        var torque = direction * (force * 10000);
         car.rb.AddTorque(torque, ForceMode.Impulse);
     }
 
@@ -290,6 +290,7 @@ public class JumpManager
     IEnumerator DelayedRerail(TrainCar car, RailTrack track)
     {
         var speedBeforeRerail = car.rb.velocity;
+
         Logger.Log($"Catch has happened! Rerail '{car}' onto '{track}' speed={speedBeforeRerail}");
 
         yield return new WaitForSeconds(Main.settings.RerailDelay);
