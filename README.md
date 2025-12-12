@@ -1,12 +1,12 @@
-# Derail Valley Better Chase Camera mod
+# Derail Valley Jumps
 
-A mod for the game [Derail Valley](https://store.steampowered.com/app/588030/Derail_Valley/) that improves on the default external camera:
+A mod for the game [Derail Valley](https://store.steampowered.com/app/588030/Derail_Valley/) that lets you jump your train!
 
-When you switch to first person camera, it will remember the state of the external camera.
+## Bindings
 
-When you switch back to external camera, if you have done so before, it will restore the previous state.
+Open the mod settings (Ctrl+F10) to view and change bindings.
 
-The camera will "freeze" to the previous state until you move your mouse, then it resets to normal.
+By default "space" for jump and numpad numbers for roll/spin/turn.
 
 ## Install
 
