@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityModManagerNet;
 
@@ -7,13 +8,15 @@ namespace DerailValleyJumps;
 public class Catcher : MonoBehaviour
 {
     public static UnityModManager.ModEntry.ModLogger Logger => Main.ModEntry.Logger;
-    public RailTrack Track;
-    public BoxCollider col;
     public Action<TrainCar> OnHit;
+    float _nextAllowedInvocation = 0f;
+    // NOTE: must be static to share between ALL catchers
+    public static Dictionary<TrainCar, bool> CarsReadyForCatch = [];
+    public static bool IsReadyToCatch = false;
 
     void Start()
     {
-        col = gameObject.GetComponent<BoxCollider>();
+        var col = gameObject.GetComponent<BoxCollider>();
 
         if (col != null)
             col.isTrigger = true;
@@ -24,77 +27,78 @@ public class Catcher : MonoBehaviour
         // Logger.Log($"DESTROY {Track}");
     }
 
-    float _nextAllowedInvocation = 0f;
-
+    /// <summary>
+    /// This trigger collider determines if the incoming collider (which a train car has MANY) is suitable for catching.
+    /// </summary>
     void OnTriggerEnter(Collider other)
     {
-        if (!IsReadyToCatch)
-            return;
-
         float now = Time.time;
 
         // Logger.Log($"OnTriggerEnter collider={other.gameObject.name} allowed={now > _nextAllowedInvocation}");
+
+        if (Main.settings.DisableCatching)
+            return;
 
         if (now < _nextAllowedInvocation)
             return;
 
         // TODO: more reliable way
         var isBogie = other.gameObject.name == "[bogies]";
-
         if (!isBogie)
             return;
 
-        TrainCar? car = null;
-        var parent = other.transform.parent;
-
-        if (parent != null)
-            car = parent.GetComponent<TrainCar>();
+        TrainCar? car = other.transform.parent.GetComponent<TrainCar>();
 
         // Logger.Log($"Bogie={isBogie} Parent={parent} car={car}");
 
         if (car == null || !car.derailed)
             return;
 
+        bool isReadyToCatch;
+
+        if (!CarsReadyForCatch.TryGetValue(car, out isReadyToCatch))
+            return;
+
+        if (!isReadyToCatch)
+            return;
+
         // Logger.Log($"CHECK upright={IsCarUpright(car, 45)} bogie={isBogie} parent={parent} car={car} derailed={car.derailed}");
 
-        if (!IsCarUpright(car, maxTiltDegrees: Main.settings.UprightDegrees))
+        if (!TrainCarHelper.IsCarUpright(car, maxTiltDegrees: Main.settings.UprightDegrees))
             return;
 
         _nextAllowedInvocation = now + 0.5f;
 
-        Logger.Log($"Invoking... bogie={isBogie} parent={parent} car={car} derailed={car.derailed}");
+        Logger.Log($"Car must be caught: {car} (bogie={isBogie} car={car} derailed={car.derailed})");
 
         OnHit.Invoke(car);
 
-        IsReadyToCatch = false;
+        // IsReadyToCatch = false;
+
+        CarsReadyForCatch[car] = false;
     }
 
-    bool IsCarUpright(TrainCar car, float maxTiltDegrees)
-    {
-        var up = car.transform.up;
-        float angle = Vector3.Angle(up, Vector3.up);
-
-        return angle <= maxTiltDegrees;
-    }
-
-
-    public static bool IsReadyToCatch = false;
-
+    /// <summary>
+    /// A car must have left the tracks for it to be catchable.
+    /// This trigger collider tracks this and tells ALL other catchers "this train is ready to catch".
+    /// </summary>
     void OnTriggerExit(Collider other)
     {
-        if (IsReadyToCatch)
+        // Logger.Log($"OnTriggerExit collider={other} IsReadyToCatch={IsReadyToCatch}");
+
+        if (Main.settings.DisableCatching)
             return;
 
-        TrainCar? car = null;
-        var parent = other.transform.parent;
-
-        if (parent != null)
-            car = parent.GetComponent<TrainCar>();
+        TrainCar? car = other.transform.parent.GetComponent<TrainCar>();
 
         if (car != null && car.derailed)
         {
-            // Logger.Log($"OnTriggerExit car={car}");
-            IsReadyToCatch = true;
+            if (CarsReadyForCatch.ContainsKey(car) && CarsReadyForCatch[car] == true)
+                return;
+
+            Logger.Log($"Car ready for catching: {car} ({IsReadyToCatch} => true)");
+
+            CarsReadyForCatch[car] = true;
         }
     }
 }

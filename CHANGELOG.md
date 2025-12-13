@@ -1,3 +1,11 @@
+# 0.0.4
+
+- gradual jump
+- better track multiple cars
+- added dependency `DerailValleyBindingHelper` for bindings
+- added master settings
+- added public callbacks for modders
+
 # 0.0.3
 
 - gradual flip/spin/roll

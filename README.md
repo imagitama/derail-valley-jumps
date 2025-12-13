@@ -15,6 +15,27 @@ By default Numpad 0 for jump, numpad numbers for roll/spin/turn and F12 to quick
 | 1           | 2 flip backward | 3            |
 | 0 jump      |                 | .            |
 
+## Callbacks
+
+```cs
+void AddCallbacks()
+{
+    DerailValleyJumps.Main.OnJump += (car) =>
+    {
+        // play sound!
+    };
+
+    DerailValleyJumps.Main.OnSpin += (car, actionId) =>
+    {
+        switch (actionId)
+        {
+            case DerailValleyJumps.Actions.RollLeft:
+                // play sound!
+        }
+    };
+}
+```
+
 ## Install
 
 Download the zip and use Unity Mod Manager to install it.

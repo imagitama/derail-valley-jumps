@@ -16,15 +16,21 @@ public static class Main
     public static UnityModManager.ModEntry ModEntry;
     public static Settings settings;
     public static JumpManager jumpManager;
+    // callbacks
+    public static Action<TrainCar> OnJump;
+    public static Action<TrainCar, int> OnSpin;
+    public static Action<TrainCar, RailTrack> OnCatch;
 
     private static bool Load(UnityModManager.ModEntry modEntry)
     {
         ModEntry = modEntry;
 
+
+
         Harmony? harmony = null;
         try
         {
-            BindingsHelper.OnReady += () =>
+            BindingHelper.OnReady += () =>
             {
                 settings = Settings.Load<Settings>(modEntry);
 
@@ -67,37 +73,9 @@ public static class Main
 
     static void OnGUI(UnityModManager.ModEntry modEntry)
     {
+        GUILayout.Label("All default values are tested on a DH4");
+
         settings.Draw(modEntry);
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Strong Jump"))
-            settings.JumpForce = 30;
-        if (GUILayout.Button("Default Jump"))
-            settings.JumpForce = 20;
-        if (GUILayout.Button("Weak Jump"))
-            settings.JumpForce = 10;
-        GUILayout.EndHorizontal();
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Strong Spin"))
-        {
-            settings.TurnForce = 10;
-            settings.FlipForce = 10;
-            settings.RollForce = 10;
-        }
-        if (GUILayout.Button("Default Spin"))
-        {
-            settings.TurnForce = 5;
-            settings.FlipForce = 5;
-            settings.RollForce = 5;
-        }
-        if (GUILayout.Button("Weak Spin"))
-        {
-            settings.TurnForce = 1;
-            settings.FlipForce = 1;
-            settings.RollForce = 1;
-        }
-        GUILayout.EndHorizontal();
 
         List<BindingInfo> bindings = [
             settings.JumpBinding,
@@ -109,7 +87,7 @@ public static class Main
             settings.RollRightBinding,
         ];
 
-        BindingsHelperUI.DrawBindings(bindings, OnUpdated: () => BindingsHelper.ApplyBindingDisables(bindings));
+        BindingHelperUI.DrawBindings(bindings, OnUpdated: () => BindingHelper.ApplyBindingDisables(bindings));
     }
 
     static void OnSaveGUI(UnityModManager.ModEntry modEntry)

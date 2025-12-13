@@ -15,28 +15,31 @@ public static class Actions
     public const int TurnRight = 504;
     public const int RollLeft = 505;
     public const int RollRight = 506;
-    public const int ReRail = 520;
 }
 
 public class Settings : UnityModManager.ModSettings, IDrawable
 {
     private static UnityModManager.ModEntry.ModLogger Logger => Main.ModEntry.Logger;
+    [Draw(Label = "If to disable all controls (jump/flip/turn/roll)")]
+    public bool DisableControls = false;
+    [Draw(Label = "If to disable the 'catching' of cars onto tracks")]
+    public bool DisableCatching = false;
     [Draw(Label = "A tiny delay before actually rerailing")]
     public float RerailDelay = 0.1f;
     [Draw(Label = "Extra gravity for heavier landings")]
     public float ExtraGravity = 2f;
-    [Draw(Label = "Draw extra debugging stuff")]
-    public bool ExtraDebugging = false;
-    [Draw(Label = "Jump Force x100000 (default 20)")]
-    public float JumpForce = 150f;
-    [Draw(Label = "Flip force x100000 (default 20)")]
-    public float FlipForce = 40f;
-    [Draw(Label = "Turn force x100000 (default 40)")]
-    public float TurnForce = 20f;
-    [Draw(Label = "Roll force x100000 (default 40)")]
-    public float RollForce = 20f;
+    [Draw(Label = "Jump Force x100000 (default 10)")]
+    public float JumpForce = 10f;
+    [Draw(Label = "Flip force x100000 (default 10)")]
+    public float FlipForce = 10f;
+    [Draw(Label = "Turn force x100000 (default 10)")]
+    public float TurnForce = 10f;
+    [Draw(Label = "Roll force x100000 (default 2)")]
+    public float RollForce = 2f;
     [Draw(Label = "What is the limit for what is upright (degrees, default 45)")]
     public float UprightDegrees = 45f;
+    [Draw(Label = "Draw extra debugging stuff")]
+    public bool ExtraDebugging = false;
     public BindingInfo JumpBinding = new BindingInfo("Jump", Actions.Jump, KeyCode.Space)
     {
         DisableDefault = true
@@ -89,6 +92,6 @@ public class Settings : UnityModManager.ModSettings, IDrawable
             RollRightBinding,
         ];
 
-        BindingsHelper.ApplyBindingDisables(bindings);
+        BindingHelper.ApplyBindingDisables(bindings);
     }
 }

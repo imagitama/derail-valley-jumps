@@ -228,4 +228,12 @@ public static class TrainCarHelper
         else
             car.SetTrack(closestTrack, rerailPos, -forward);
     }
+
+    public static bool IsCarUpright(TrainCar car, float maxTiltDegrees)
+    {
+        var up = car.transform.up;
+        float angle = Vector3.Angle(up, Vector3.up);
+
+        return angle <= maxTiltDegrees;
+    }
 }

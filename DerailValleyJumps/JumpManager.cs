@@ -75,10 +75,9 @@ public class JumpManager
         var binding = Main.settings.JumpBinding;
         if (binding.ButtonId == null) return;
 
-        bool isPressed = BindingsHelper.GetIsPressed(binding);
+        bool isPressed = BindingHelper.GetIsPressed(binding);
 
-        if (IsNewPress(binding, isPressed))
-            JumpTrainCar();
+        JumpTrainCar(isPressed);
     }
 
     void HandleFlipForwards()
@@ -86,10 +85,9 @@ public class JumpManager
         var binding = Main.settings.FlipFowardsBinding;
         if (binding.ButtonId == null) return;
 
-        bool isPressed = BindingsHelper.GetIsPressed(binding);
+        bool isPressed = BindingHelper.GetIsPressed(binding);
 
-        // if (isPressed)
-        SpinTrainCar(binding.ActionId!.Value, isPressed); // PlayerManager.Car.transform.right;
+        SpinTrainCar(binding.ActionId!.Value, isPressed);
     }
 
     void HandleFlipBackwards()
@@ -97,10 +95,9 @@ public class JumpManager
         var binding = Main.settings.FlipBackwardsBinding;
         if (binding.ButtonId == null) return;
 
-        bool isPressed = BindingsHelper.GetIsPressed(binding);
+        bool isPressed = BindingHelper.GetIsPressed(binding);
 
-        // if (isPressed)
-        SpinTrainCar(binding.ActionId!.Value, isPressed); // -PlayerManager.Car.transform.right
+        SpinTrainCar(binding.ActionId!.Value, isPressed);
     }
 
     void HandleTurnLeft()
@@ -108,10 +105,9 @@ public class JumpManager
         var binding = Main.settings.TurnLeftBinding;
         if (binding.ButtonId == null) return;
 
-        bool isPressed = BindingsHelper.GetIsPressed(binding);
+        bool isPressed = BindingHelper.GetIsPressed(binding);
 
-        // if (isPressed)
-        SpinTrainCar(binding.ActionId!.Value, isPressed); // -PlayerManager.Car.transform.up
+        SpinTrainCar(binding.ActionId!.Value, isPressed);
     }
 
     void HandleTurnRight()
@@ -119,10 +115,9 @@ public class JumpManager
         var binding = Main.settings.TurnRightBinding;
         if (binding.ButtonId == null) return;
 
-        bool isPressed = BindingsHelper.GetIsPressed(binding);
+        bool isPressed = BindingHelper.GetIsPressed(binding);
 
-        // if (isPressed)
-        SpinTrainCar(binding.ActionId!.Value, isPressed); // PlayerManager.Car.transform.up
+        SpinTrainCar(binding.ActionId!.Value, isPressed);
     }
 
     void HandleRollLeft()
@@ -130,10 +125,9 @@ public class JumpManager
         var binding = Main.settings.RollLeftBinding;
         if (binding.ButtonId == null) return;
 
-        bool isPressed = BindingsHelper.GetIsPressed(binding);
+        bool isPressed = BindingHelper.GetIsPressed(binding);
 
-        // if (isPressed)
-        SpinTrainCar(binding.ActionId!.Value, isPressed); // -PlayerManager.Car.transform.forward
+        SpinTrainCar(binding.ActionId!.Value, isPressed);
     }
 
     void HandleRollRight()
@@ -141,10 +135,9 @@ public class JumpManager
         var binding = Main.settings.RollRightBinding;
         if (binding.ButtonId == null) return;
 
-        bool isPressed = BindingsHelper.GetIsPressed(binding);
+        bool isPressed = BindingHelper.GetIsPressed(binding);
 
-        // if (isPressed)
-        SpinTrainCar(binding.ActionId!.Value, isPressed); // PlayerManager.Car.transform.forward
+        SpinTrainCar(binding.ActionId!.Value, isPressed);
     }
 
     void OnLateFrame()
@@ -156,17 +149,39 @@ public class JumpManager
             PlayerManager.Car.rb.AddForce(Physics.gravity * Main.settings.ExtraGravity * PlayerManager.Car.rb.mass);
     }
 
-    void JumpTrainCar()
+    private float? _jumpPressStart;
+
+    void JumpTrainCar(bool isPressed)
     {
         // Logger.Log("Jump!");
 
         var car = PlayerManager.Car;
-
         if (car == null)
             return;
 
-        car.Derail(suppressDerailSound: true);
-        car.rb.AddForce(Vector3.up * (Main.settings.JumpForce * 10000), ForceMode.Impulse);
+        if (!isPressed)
+        {
+            _jumpPressStart = null;
+            return;
+        }
+
+        if (_jumpPressStart == null)
+        {
+            Main.OnJump?.Invoke(car);
+            _jumpPressStart = Time.time;
+        }
+
+        if (!car.derailed)
+            car.Derail(suppressDerailSound: true);
+
+        float heldTime = Time.time - _jumpPressStart.Value;
+        float strength01 = Mathf.Clamp01(heldTime / RampTime);
+
+        float baseForce = Main.settings.JumpForce;
+        float scaledForce = baseForce * strength01;
+        var force = Vector3.up * (scaledForce * 10000);
+
+        car.rb.AddForce(force, ForceMode.Impulse);
 
         Catcher.IsReadyToCatch = false;
     }
@@ -188,6 +203,7 @@ public class JumpManager
 
         if (!actionPressStart.TryGetValue(actionId, out var startTime))
         {
+            Main.OnSpin?.Invoke(car, actionId);
             startTime = Time.time;
             actionPressStart[actionId] = startTime;
         }
@@ -201,7 +217,6 @@ public class JumpManager
         switch (actionId)
         {
             case Actions.FlipForwards:
-                Logger.Log("FORWARD");
                 direction = car.transform.right;
                 baseForce = Main.settings.FlipForce;
                 break;
@@ -235,57 +250,6 @@ public class JumpManager
         car.rb.AddTorque(torque, ForceMode.Impulse);
     }
 
-
-    // void SpinTrainCar(int actionId)
-    // {
-    //     // Logger.Log("Spin!");
-
-    //     var car = PlayerManager.Car;
-
-    //     if (car == null)
-    //         return;
-
-    //     if (!car.derailed)
-    //         return;
-
-    //     Vector3 direction;
-    //     float force;
-
-    //     switch (actionId)
-    //     {
-    //         case Actions.FlipForwards:
-    //             direction = PlayerManager.Car.transform.right;
-    //             force = Main.settings.FlipForce;
-    //             break;
-    //         case Actions.FlipBackwards:
-
-    //             direction = -PlayerManager.Car.transform.right;
-    //             force = Main.settings.FlipForce;
-    //             break;
-    //         case Actions.TurnLeft:
-    //             direction = -PlayerManager.Car.transform.up;
-    //             force = Main.settings.TurnForce;
-    //             break;
-    //         case Actions.TurnRight:
-    //             direction = PlayerManager.Car.transform.up;
-    //             force = Main.settings.TurnForce;
-    //             break;
-    //         case Actions.RollLeft:
-    //             direction = -PlayerManager.Car.transform.forward;
-    //             force = Main.settings.RollForce;
-    //             break;
-    //         case Actions.RollRight:
-    //             direction = PlayerManager.Car.transform.forward;
-    //             force = Main.settings.RollForce;
-    //             break;
-    //         default:
-    //             throw new Exception($"Cannot do action: {actionId}");
-    //     }
-
-    //     var torque = direction * (force * 10000);
-    //     car.rb.AddTorque(torque, ForceMode.Impulse);
-    // }
-
     public void AddToRailTracks()
     {
         var allTracks = RailTrackRegistry.RailTracks.ToList();
@@ -315,7 +279,6 @@ public class JumpManager
                 }
 
                 var newComp = colliderObj.gameObject.AddComponent<Catcher>();
-                newComp.Track = track;
                 newComp.OnHit = car => OnHit(car, track);
 
                 _catchers.Add(newComp);
@@ -325,21 +288,13 @@ public class JumpManager
         Logger.Log("Addition done");
     }
 
-    void ManuallyReRailPlayerCar()
-    {
-        Logger.Log("Manually rerail player car");
-
-        var car = PlayerManager.Car;
-        if (car != null)
-        {
-            TrainCarHelper.RerailTrainWithoutVelocity(car, car.transform.forward);
-        }
-    }
-
     void OnHit(TrainCar car, RailTrack track)
     {
         if (_updateDriver == null)
             return;
+
+        Main.OnCatch?.Invoke(car, track);
+
         _updateDriver.StartCoroutine(DelayedRerail(car, track));
     }
 
